@@ -15,23 +15,6 @@ body {
   color: white;
 }
 
-/* Admin Button */
-.admin-icon {
-  position: absolute;
-  top: 20px;
-  right: 30px;
-  background: rgba(255, 255, 255, 0.15);
-  padding: 8px 16px;
-  border-radius: 20px;
-  font-size: 13px;
-  cursor: pointer;
-  transition: 0.2s;
-}
-
-.admin-icon:hover {
-  background: rgba(255, 255, 255, 0.3);
-}
-
 /* Card */
 .container {
   width: 360px;
@@ -59,35 +42,7 @@ input {
   font-size: 14px;
 }
 
-/* Leave Buttons */
-.leave-options {
-  display: flex;
-  gap: 10px;
-  margin-bottom: 20px;
-}
-
-.leave-btn {
-  flex: 1;
-  padding: 12px;
-  border-radius: 8px;
-  border: none;
-  background: rgba(255, 255, 255, 0.15);
-  color: white;
-  font-size: 13px;
-  font-weight: 600;
-  cursor: pointer;
-  transition: 0.2s;
-}
-
-.leave-btn:hover {
-  background: rgba(255, 255, 255, 0.25);
-}
-
-.leave-btn.active {
-  background: #1f4ed8;
-}
-
-/* Primary Button */
+/* Buttons */
 .primary-btn {
   width: 100%;
   padding: 13px;
@@ -122,13 +77,6 @@ input {
   background: rgba(255,255,255,0.15);
 }
 
-/* Empty State */
-.empty-state {
-  opacity: 0.7;
-  font-size: 14px;
-  margin: 10px 0 20px;
-}
-
 /* Modal */
 .modal-overlay {
   position: fixed;
@@ -149,7 +97,6 @@ input {
   border-radius: 14px;
   width: 320px;
   text-align: center;
-  box-shadow: 0 25px 40px rgba(0,0,0,0.4);
 }
 
 .modal p {
@@ -157,12 +104,13 @@ input {
   font-size: 14px;
 }
 
-/* Login loading state */
+/* 🔄 LOGIN LOADING STATE */
 button.loading {
   pointer-events: none;
   opacity: 0.85;
 }
 
+/* Spinner */
 .spinner {
   width: 18px;
   height: 18px;
@@ -176,6 +124,7 @@ button.loading {
 }
 
 @keyframes spin {
-  to { transform: rotate(360deg); }
+  to {
+    transform: rotate(360deg);
+  }
 }
-
