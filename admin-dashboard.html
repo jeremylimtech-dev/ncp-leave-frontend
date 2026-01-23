@@ -38,6 +38,12 @@
 </div>
 
 <script>
+/* 🔐 PROTECT ADMIN PAGE */
+if (localStorage.getItem("isAdmin") !== "true") {
+  window.location.replace("admin-login.html");
+}
+
+/* CONFIG */
 const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwAiAyEifv4NM2zauRpYwR16XdI_wKiAXQKcGz0meu4rcZDTHnTt94oNJt0AvCWK_1a/exec";
 
 /* Demo data (replace with real data later) */
@@ -53,7 +59,7 @@ document.getElementById("no-requests").style.display = "none";
 function updateStatus(status) {
   const payload = {
     action: "updateStatus",
-    admin: "Admin",
+    admin: localStorage.getItem("adminName") || "Admin",
     name: request.name,
     type: request.type,
     start: request.start,
@@ -82,9 +88,11 @@ function closeModal() {
 
 function logoutAdmin() {
   localStorage.removeItem("isAdmin");
-  window.location.href = "admin-login.html";
+  localStorage.removeItem("adminName");
+  window.location.replace("admin-login.html");
 }
 </script>
+
 
 </body>
 </html>
