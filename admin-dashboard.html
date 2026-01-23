@@ -7,85 +7,79 @@
 </head>
 <body>
 
-<!-- Logout Button -->
 <div class="admin-icon" onclick="logoutAdmin()">Logout</div>
 
-<div class="container" style="width: 800px; text-align: left;">
+<div class="container" style="width: 800px;">
   <h1 style="text-align:center;">Admin Dashboard</h1>
 
-  <!-- Leave Requests -->
   <h3>Leave Requests</h3>
 
-  <table style="width:100%; color:white; font-size:14px; border-collapse: collapse;">
-    <tr style="opacity:0.8;">
-      <th align="left">Name</th>
-      <th align="left">Type</th>
-      <th align="left">Dates</th>
-      <th align="left">Status</th>
-      <th align="center">Action</th>
-    </tr>
+  <div id="no-requests" class="empty-state">
+    No leave requests yet.
+  </div>
 
-    <tr>
-      <td>Juan D.</td>
-      <td>Sick</td>
-      <td>Jan 22 – Jan 24</td>
-      <td id="status1">Pending</td>
-      <td align="center">
-        <button onclick="approve(1)">✔</button>
-        <button onclick="reject(1)">✖</button>
-      </td>
-    </tr>
-  </table>
+  <!-- Example request card (loaded dynamically later) -->
+  <div id="request-card" class="request-card">
+    <strong>Juan D.</strong><br>
+    Sick Leave<br>
+    Jan 22 – Jan 24<br><br>
 
-  <br><br>
+    <button class="primary-btn" onclick="updateStatus('Approved')">Approve</button>
+    <button class="secondary-btn" onclick="updateStatus('Rejected')">Reject</button>
+  </div>
+</div>
 
-  <!-- Balances -->
-  <h3>Employee Leave Balances</h3>
-
-  <table style="width:100%; color:white; font-size:14px; border-collapse: collapse;">
-    <tr style="opacity:0.8;">
-      <th align="left">Name</th>
-      <th align="center">Sick</th>
-      <th align="center">Annual</th>
-      <th align="center">Unpaid</th>
-      <th align="center">Save</th>
-    </tr>
-
-    <tr>
-      <td>Juan D.</td>
-      <td align="center"><input value="5" style="width:60px;"></td>
-      <td align="center"><input value="10" style="width:60px;"></td>
-      <td align="center">∞</td>
-      <td align="center">
-        <button onclick="saveBalance()">Save</button>
-      </td>
-    </tr>
-  </table>
+<!-- Modal -->
+<div id="modal-overlay" class="modal-overlay">
+  <div class="modal">
+    <p id="modal-message"></p>
+    <button class="primary-btn" onclick="closeModal()">OK</button>
+  </div>
 </div>
 
 <script>
-/* Protect Admin Page */
-if (localStorage.getItem("isAdmin") !== "true") {
-  window.location.href = "admin-login.html";
+const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwAiAyEifv4NM2zauRpYwR16XdI_wKiAXQKcGz0meu4rcZDTHnTt94oNJt0AvCWK_1a/exec";
+
+/* Demo data (replace with real data later) */
+const request = {
+  name: "Juan D.",
+  type: "Sick",
+  start: "2024-01-22",
+  end: "2024-01-24"
+};
+
+document.getElementById("no-requests").style.display = "none";
+
+function updateStatus(status) {
+  const payload = {
+    action: "updateStatus",
+    admin: "Admin",
+    name: request.name,
+    type: request.type,
+    start: request.start,
+    end: request.end,
+    status: status
+  };
+
+  fetch(SCRIPT_URL, {
+    method: "POST",
+    mode: "no-cors",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(payload)
+  }).then(() => {
+    showModal("Leave request " + status);
+  });
 }
 
-/* Approve / Reject */
-function approve(id) {
-  document.getElementById("status" + id).innerText = "Approved";
-  alert("Leave approved");
+function showModal(msg) {
+  document.getElementById("modal-message").innerText = msg;
+  document.getElementById("modal-overlay").style.display = "flex";
 }
 
-function reject(id) {
-  document.getElementById("status" + id).innerText = "Rejected";
-  alert("Leave rejected");
+function closeModal() {
+  document.getElementById("modal-overlay").style.display = "none";
 }
 
-/* Save Balance */
-function saveBalance() {
-  alert("Balances updated");
-}
-
-/* Logout */
 function logoutAdmin() {
   localStorage.removeItem("isAdmin");
   window.location.href = "admin-login.html";

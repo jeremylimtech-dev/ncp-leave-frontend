@@ -10,48 +10,55 @@
 <div class="container">
   <h1>Admin Login</h1>
 
-  <input
-    type="text"
-    id="adminUser"
-    placeholder="Username"
-  >
+  <form id="loginForm" method="POST">
+    <input type="text" name="username" placeholder="Username" required>
+    <input type="password" name="password" placeholder="Password" required>
 
-  <input
-    type="password"
-    id="adminPass"
-    placeholder="Password"
-  >
+    <input type="hidden" name="redirect"
+      value="https://jeremylimtech-dev.github.io/ncp-leave-frontend/admin-login.html">
 
-  <button class="primary-btn" onclick="loginAdmin()">Login</button>
+    <button class="primary-btn" type="submit">Login</button>
+    <button class="secondary-btn" type="button" onclick="goBack()">Back</button>
+  </form>
+</div>
 
-  <!-- Back Button -->
-  <button class="secondary-btn" onclick="goBack()">Back to Leave Page</button>
+<!-- Modal -->
+<div id="modal-overlay" class="modal-overlay">
+  <div class="modal">
+    <p id="modal-message"></p>
+    <button class="primary-btn" onclick="closeModal()">OK</button>
+  </div>
 </div>
 
 <script>
-/* If already logged in, skip login */
-if (localStorage.getItem("isAdmin") === "true") {
+/* 🔴 CHANGE THIS */
+document.getElementById("loginForm").action =
+  "https://script.google.com/macros/s/AKfycbwAiAyEifv4NM2zauRpYwR16XdI_wKiAXQKcGz0meu4rcZDTHnTt94oNJt0AvCWK_1a/exec";
+
+/* Handle redirect result */
+const params = new URLSearchParams(window.location.search);
+
+if (params.get("ok") === "1") {
+  localStorage.setItem("isAdmin", "true");
+  localStorage.setItem("adminName", params.get("name"));
   window.location.href = "admin-dashboard.html";
 }
 
-function loginAdmin() {
-  const user = document.getElementById("adminUser").value.trim();
-  const pass = document.getElementById("adminPass").value.trim();
-
-  if (user === "" || pass === "") {
-    alert("Please enter username and password.");
-    return;
-  }
-
-  /* Demo credentials */
-  if (user === "admin" && pass === "1234") {
-    localStorage.setItem("isAdmin", "true");
-    window.location.href = "admin-dashboard.html";
-  } else {
-    alert("Invalid admin credentials.");
-  }
+if (params.get("ok") === "0") {
+  showModal("Invalid username or password.");
 }
 
+/* Modal */
+function showModal(msg) {
+  document.getElementById("modal-message").innerText = msg;
+  document.getElementById("modal-overlay").style.display = "flex";
+}
+
+function closeModal() {
+  document.getElementById("modal-overlay").style.display = "none";
+}
+
+/* Back */
 function goBack() {
   window.location.href = "index.html";
 }
