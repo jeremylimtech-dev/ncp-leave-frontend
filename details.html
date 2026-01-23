@@ -52,6 +52,7 @@ function submitLeave() {
   }
 
   const payload = {
+  action: "submitLeave",
   name: localStorage.getItem("employeeName"),
   type: localStorage.getItem("leaveType"),
   balance: document.getElementById("balance").value,
@@ -59,6 +60,7 @@ function submitLeave() {
   end: end,
   reason: reason
   };
+
 
 
   fetch("https://script.google.com/macros/s/AKfycbwAiAyEifv4NM2zauRpYwR16XdI_wKiAXQKcGz0meu4rcZDTHnTt94oNJt0AvCWK_1a/exec", {
