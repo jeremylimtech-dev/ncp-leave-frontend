@@ -228,3 +228,58 @@ button {
   font-weight: 700;
 }
 
+/* ===== ADMIN REQUEST CARD ===== */
+
+.request-card {
+  background: rgba(255,255,255,0.06);
+  border-left: 4px solid #1f4ed8;
+  padding: 20px;
+  border-radius: 12px;
+  margin-bottom: 20px;
+}
+
+.request-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 10px;
+}
+
+.request-body {
+  font-size: 14px;
+  line-height: 1.6;
+}
+
+.reason {
+  margin-top: 8px;
+  opacity: 0.9;
+}
+
+.request-actions {
+  margin-top: 15px;
+  display: flex;
+  gap: 10px;
+}
+
+/* ===== STATUS BADGES ===== */
+
+.status {
+  padding: 4px 10px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.status.pending {
+  background: rgba(255,255,255,0.2);
+}
+
+.status.approved {
+  background: #16a34a;
+}
+
+.status.rejected {
+  background: #dc2626;
+}
+
+
