@@ -5,7 +5,7 @@
   <title>Admin Dashboard</title>
   <link rel="stylesheet" href="style.css">
 </head>
-<body>
+<body class="admin">
 
 <div class="admin-icon" onclick="logoutAdmin()">Logout</div>
 
@@ -70,17 +70,21 @@ fetch(SCRIPT_URL + "?action=getLeaves")
 
 
         ${
-          l.status === "Pending"
-          ? `
-            <button class="primary-btn" onclick='updateStatus("${l.name}","${l.start}","${l.end}","Approved","${l.type}")'>
-              Approve
-            </button>
-            <button class="secondary-btn" onclick='updateStatus("${l.name}","${l.start}","${l.end}","Rejected","${l.type}")'>
-              Reject
-            </button>
-          `
-          : ""
-        }
+  l.status === "Pending"
+  ? `
+    <div class="request-actions">
+      <button class="primary-btn"
+        onclick='updateStatus("${l.name}","${l.start}","${l.end}","Approved","${l.type}")'>
+        Approve
+      </button>
+      <button class="secondary-btn"
+        onclick='updateStatus("${l.name}","${l.start}","${l.end}","Rejected","${l.type}")'>
+        Reject
+      </button>
+    </div>
+  `
+  : ""
+}
       `;
 
       container.appendChild(card);
@@ -131,5 +135,6 @@ function logoutAdmin() {
 
 </body>
 </html>
+
 
 
