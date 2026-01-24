@@ -13,11 +13,11 @@
   <h1 style="text-align:center;">Admin Dashboard</h1>
   <h3 style="text-align:center;">Leave Requests</h3>
 
-  <div id="requests"></div>
-
   <div id="no-requests" class="empty-state">
     No leave requests yet.
   </div>
+
+  <div id="requests"></div>
 </div>
 
 <!-- Modal -->
@@ -29,7 +29,7 @@
 </div>
 
 <script>
-/* 🔐 PROTECT PAGE */
+/* 🔐 PROTECT ADMIN PAGE */
 if (localStorage.getItem("isAdmin") !== "true") {
   window.location.replace("admin-login.html");
 }
@@ -37,73 +37,78 @@ if (localStorage.getItem("isAdmin") !== "true") {
 const SCRIPT_URL =
   "https://script.google.com/macros/s/AKfycbwAiAyEifv4NM2zauRpYwR16XdI_wKiAXQKcGz0meu4rcZDTHnTt94oNJt0AvCWK_1a/exec";
 
-/* 📥 LOAD REQUESTS */
+const container = document.getElementById("requests");
+const emptyState = document.getElementById("no-requests");
+
+/* 🧠 Load leaves */
 fetch(SCRIPT_URL + "?action=getLeaves")
   .then(res => res.json())
-  .then(data => renderRequests(data));
+  .then(data => {
+    if (!data.success || data.leaves.length === 0) {
+      emptyState.style.display = "block";
+      return;
+    }
 
-function renderRequests(data) {
-  const container = document.getElementById("requests");
-  container.innerHTML = "";
+    emptyState.style.display = "none";
 
-  if (!data.length) {
-    document.getElementById("no-requests").style.display = "block";
-    return;
-  }
+    data.leaves.forEach(l => {
+      const card = document.createElement("div");
+      card.className = "request-card";
 
-  document.getElementById("no-requests").style.display = "none";
+      card.innerHTML = `
+        <div class="request-header">
+          <strong>${l.name}</strong>
+          <span class="status ${l.status.toLowerCase()}">${l.status}</span>
+        </div>
 
-  data.forEach(req => {
-    const card = document.createElement("div");
-    card.className = "request-card";
+        <div class="request-body">
+          <div><b>Type:</b> ${l.type}</div>
+          <div><b>Dates:</b> ${formatDate(l.start)} → ${formatDate(l.end)}</div>
+          <div><b>Balance:</b> ${l.balance}</div>
+          <div class="reason"><b>Reason:</b> ${l.reason || "-"}</div>
+        </div>
 
-    card.innerHTML = `
-      <div class="request-header">
-        <strong>${req.name}</strong>
-        <span class="status ${req.status.toLowerCase()}">${req.status}</span>
-      </div>
-
-      <div class="request-body">
-        <div><b>Leave Type:</b> ${req.type}</div>
-        <div><b>Dates:</b> ${formatDate(req.start)} – ${formatDate(req.end)}</div>
-        <div class="reason"><b>Reason:</b> ${req.reason || "-"}</div>
-      </div>
-
-      ${
-        req.status === "Pending"
+        ${
+          l.status === "Pending"
           ? `
-        <div class="request-actions">
-          <button class="primary-btn" onclick="updateStatus('${req.id}','Approved')">Approve</button>
-          <button class="secondary-btn" onclick="updateStatus('${req.id}','Rejected')">Reject</button>
-        </div>`
+            <button class="primary-btn" onclick='updateStatus("${l.name}","${l.start}","${l.end}","Approved","${l.type}")'>
+              Approve
+            </button>
+            <button class="secondary-btn" onclick='updateStatus("${l.name}","${l.start}","${l.end}","Rejected","${l.type}")'>
+              Reject
+            </button>
+          `
           : ""
-      }
-    `;
+        }
+      `;
 
-    container.appendChild(card);
+      container.appendChild(card);
+    });
   });
-}
 
-function updateStatus(id, status) {
+/* ✅ Update status */
+function updateStatus(name, start, end, status, type) {
   fetch(SCRIPT_URL, {
     method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({
+    headers: { "Content-Type": "application/x-www-form-urlencoded" },
+    body: new URLSearchParams({
       action: "updateStatus",
-      id,
+      name,
+      start,
+      end,
       status,
+      type,
       admin: localStorage.getItem("adminName")
     })
-  })
-  .then(() => {
-    showModal(`Request ${status}`);
-    location.reload();
+  }).then(() => {
+    showModal("Leave request " + status);
+    setTimeout(() => location.reload(), 800);
   });
 }
 
-function formatDate(dateStr) {
-  const d = new Date(dateStr);
-  return d.toLocaleDateString();
+/* Helpers */
+function formatDate(d) {
+  return new Date(d).toLocaleDateString();
 }
 
 function showModal(msg) {
@@ -117,7 +122,9 @@ function closeModal() {
 
 function logoutAdmin() {
   localStorage.clear();
-  window.location.replace("admin-login.html");
+  window.location.replace(
+    "https://jeremylimtech-dev.github.io/ncp-leave-frontend/admin-login.html"
+  );
 }
 </script>
 
