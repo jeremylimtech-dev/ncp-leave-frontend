@@ -203,3 +203,28 @@ button {
     transform: rotate(360deg);
   }
 }
+
+.request-card {
+  background: rgba(255,255,255,0.08);
+  padding: 20px;
+  border-radius: 12px;
+  margin-bottom: 15px;
+}
+
+.request-card.approved {
+  border-left: 4px solid #2ecc71;
+}
+
+.request-card.rejected {
+  border-left: 4px solid #e74c3c;
+}
+
+.request-card.pending {
+  border-left: 4px solid #f1c40f;
+}
+
+.status {
+  font-size: 12px;
+  font-weight: 700;
+}
+
