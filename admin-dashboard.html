@@ -7,20 +7,17 @@
 </head>
 <body>
 
-<!-- Logout -->
 <div class="admin-icon" onclick="logoutAdmin()">Logout</div>
 
-<div class="container" style="width: 800px;">
+<div class="container" style="width: 900px;">
   <h1 style="text-align:center;">Admin Dashboard</h1>
+  <h3 style="text-align:center;">Leave Requests</h3>
 
-  <h3>Leave Requests</h3>
+  <div id="requests"></div>
 
   <div id="no-requests" class="empty-state">
     No leave requests yet.
   </div>
-
-  <!-- Dynamic requests go here -->
-  <div id="requests"></div>
 </div>
 
 <!-- Modal -->
@@ -32,88 +29,83 @@
 </div>
 
 <script>
-/* 🔐 PROTECT ADMIN PAGE */
+/* 🔐 PROTECT PAGE */
 if (localStorage.getItem("isAdmin") !== "true") {
   window.location.replace("admin-login.html");
 }
 
-/* CONFIG */
 const SCRIPT_URL =
   "https://script.google.com/macros/s/AKfycbwAiAyEifv4NM2zauRpYwR16XdI_wKiAXQKcGz0meu4rcZDTHnTt94oNJt0AvCWK_1a/exec";
 
-const adminName = localStorage.getItem("adminName") || "Admin";
+/* 📥 LOAD REQUESTS */
+fetch(SCRIPT_URL + "?action=getLeaves")
+  .then(res => res.json())
+  .then(data => renderRequests(data));
 
-/* LOAD LEAVE REQUESTS */
-fetch(SCRIPT_URL, {
-  method: "POST",
-  body: new URLSearchParams({ action: "getLeaves" })
-})
-.then(res => res.json())
-.then(data => {
+function renderRequests(data) {
   const container = document.getElementById("requests");
   container.innerHTML = "";
 
-  if (!data.success || !data.leaves.length) {
+  if (!data.length) {
     document.getElementById("no-requests").style.display = "block";
     return;
   }
 
   document.getElementById("no-requests").style.display = "none";
 
-  data.leaves.reverse().forEach(l => {
+  data.forEach(req => {
     const card = document.createElement("div");
-    card.className = `request-card ${l.status.toLowerCase()}`;
+    card.className = "request-card";
 
     card.innerHTML = `
-      <strong>${l.name}</strong><br>
-      ${l.type} Leave<br>
-      ${l.start} – ${l.end}<br>
-      <small>${l.reason || ""}</small><br><br>
+      <div class="request-header">
+        <strong>${req.name}</strong>
+        <span class="status ${req.status.toLowerCase()}">${req.status}</span>
+      </div>
 
-      <span class="status">${l.status}</span><br><br>
+      <div class="request-body">
+        <div><b>Leave Type:</b> ${req.type}</div>
+        <div><b>Dates:</b> ${formatDate(req.start)} – ${formatDate(req.end)}</div>
+        <div class="reason"><b>Reason:</b> ${req.reason || "-"}</div>
+      </div>
 
-      ${l.status === "Pending" ? `
-        <button class="primary-btn" onclick="updateStatus(
-          '${l.name}',
-          '${l.type}',
-          '${l.start}',
-          '${l.end}',
-          'Approved'
-        )">Approve</button>
-
-        <button class="secondary-btn" onclick="updateStatus(
-          '${l.name}',
-          '${l.type}',
-          '${l.start}',
-          '${l.end}',
-          'Rejected'
-        )">Reject</button>
-      ` : ""}
+      ${
+        req.status === "Pending"
+          ? `
+        <div class="request-actions">
+          <button class="primary-btn" onclick="updateStatus('${req.id}','Approved')">Approve</button>
+          <button class="secondary-btn" onclick="updateStatus('${req.id}','Rejected')">Reject</button>
+        </div>`
+          : ""
+      }
     `;
 
     container.appendChild(card);
   });
-});
+}
 
-/* UPDATE STATUS */
-function updateStatus(name, type, start, end, status) {
+function updateStatus(id, status) {
   fetch(SCRIPT_URL, {
     method: "POST",
-    body: new URLSearchParams({
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
       action: "updateStatus",
-      admin: adminName,
-      name,
-      type,
-      start,
-      end,
-      status
+      id,
+      status,
+      admin: localStorage.getItem("adminName")
     })
-  }).then(() => {
-    showModal(`Leave request ${status}`);
+  })
+  .then(() => {
+    showModal(`Request ${status}`);
+    location.reload();
   });
 }
 
-/* MODAL */
+function formatDate(dateStr) {
+  const d = new Date(dateStr);
+  return d.toLocaleDateString();
+}
+
 function showModal(msg) {
   document.getElementById("modal-message").innerText = msg;
   document.getElementById("modal-overlay").style.display = "flex";
@@ -121,15 +113,11 @@ function showModal(msg) {
 
 function closeModal() {
   document.getElementById("modal-overlay").style.display = "none";
-  location.reload();
 }
 
-/* LOGOUT */
 function logoutAdmin() {
   localStorage.clear();
-  window.location.replace(
-    "https://jeremylimtech-dev.github.io/ncp-leave-frontend/admin-login.html"
-  );
+  window.location.replace("admin-login.html");
 }
 </script>
 
