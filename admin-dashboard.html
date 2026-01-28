@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Admin Dashboard</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<!-- Logout -->
+<div class="admin-icon" onclick="logoutAdmin()">Logout</div>
+
+<!-- Main Container -->
+<div class="container" style="width: 900px;">
+  <h1 style="text-align:center;">Admin Dashboard</h1>
+  <h3 style="text-align:center;">Leave Requests</h3>
+
+  <div id="no-requests" class="empty-state">
+    No leave requests yet.
+  </div>
+
+  <div id="requests"></div>
+</div>
+
+<!-- Modal -->
+<div id="modal-overlay" class="modal-overlay">
+  <div class="modal">
+    <p id="modal-message"></p>
+    <button class="primary-btn" onclick="closeModal()">OK</button>
+  </div>
+</div>
+
+<script>
+/* 🔐 Protect admin page */
+if (localStorage.getItem("isAdmin") !== "true") {
+  window.location.replace("admin-login.html");
+}
+
+/* CONFIG */
+const SCRIPT_URL =
+  "https://script.google.com/macros/s/AKfycbyzEx_IBVX8ZiIEtiao7QUOc-Dv8Yyp8F3SIW7-vMQQvpwEt5DPPXAxTwh0WoAeH0bC/exec";
+
+const container = document.getElementById("requests");
+const emptyState = document.getElementById("no-requests");
+
+/* 📥 Load leave requests */
+fetch(SCRIPT_URL + "?action=getLeaves")
+  .then(res => res.json())
+  .then(data => {
+    if (!data.success || data.leaves.length === 0) {
+      emptyState.style.display = "block";
+      return;
+    }
+
+    emptyState.style.display = "none";
+
+    data.leaves.forEach(l => {
+      const card = document.createElement("div");
+      card.className = "request-card";
+
+      card.innerHTML = `
+        <div class="request-header">
+          <strong>${l.name}</strong>
+          <span class="status ${l.status.toLowerCase()}">${l.status}</span>
+        </div>
+
+        <div class="request-body">
+          <div><b>${l.type} Leave</b></div>
+          <div>
+            ${formatDate(l.start)} – ${formatDate(l.end)}
+            (${calculateDays(l.start, l.end)} days)
+          </div>
+          <div>Balance: ${extractBalance(l.balance)} days</div>
+          <div class="reason">Reason: ${l.reason || "-"}</div>
+
+          ${
+            l.attachment
+              ? `<div class="attachment">
+                   📎 <a href="${l.attachment}" target="_blank">
+                     View Attachment
+                   </a>
+                 </div>`
+              : ""
+          }
+        </div>
+
+        ${
+          l.status === "Pending"
+            ? `
+              <div class="request-actions">
+                <button class="primary-btn"
+                  onclick='updateStatus("${l.name}","${l.start}","${l.end}","Approved","${l.type}")'>
+                  Approve
+                </button>
+                <button class="secondary-btn"
+                  onclick='updateStatus("${l.name}","${l.start}","${l.end}","Rejected","${l.type}")'>
+                  Reject
+                </button>
+              </div>
+            `
+            : ""
+        }
+      `;
+
+      container.appendChild(card);
+    });
+  });
+
+/* ✅ Update status */
+function updateStatus(name, start, end, status, type) {
+  fetch(SCRIPT_URL, {
+    method: "POST",
+    headers: { "Content-Type": "application/x-www-form-urlencoded" },
+    body: new URLSearchParams({
+      action: "updateStatus",
+      name,
+      start,
+      end,
+      status,
+      type,
+      admin: localStorage.getItem("adminName") || "Admin"
+    })
+  }).then(() => {
+    showModal("Leave request " + status);
+    setTimeout(() => location.reload(), 800);
+  });
+}
+
+/* Helpers */
+function formatDate(d) {
+  return new Date(d).toLocaleDateString();
+}
+
+function calculateDays(start, end) {
+  const s = new Date(start);
+  const e = new Date(end);
+  return Math.round((e - s) / (1000 * 60 * 60 * 24)) + 1;
+}
+
+function extractBalance(text) {
+  const match = String(text).match(/\d+/);
+  return match ? match[0] : "0";
+}
+
+function showModal(msg) {
+  document.getElementById("modal-message").innerText = msg;
+  document.getElementById("modal-overlay").style.display = "flex";
+}
+
+function closeModal() {
+  document.getElementById("modal-overlay").style.display = "none";
+}
+
+function logoutAdmin() {
+  localStorage.clear();
+  window.location.replace(
+    "https://jeremylimtech-dev.github.io/ncp-leave-frontend/admin-login.html"
+  );
+}
+</script>
+
+</body>
+</html>
