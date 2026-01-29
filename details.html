@@ -120,22 +120,25 @@ function submitLeave() {
 ===================== */
 function sendPayload(payload) {
   fetch(SCRIPT_URL, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json"
-    },
-    body: JSON.stringify(payload)
-  })
-    .then(res => res.text())
-	.then(text => {
-	console.log("RAW RESPONSE:", text);
-	const data = JSON.parse(text);
+  method: "POST",
+  body: formData
+})
+  .then(res => res.text())
+  .then(text => {
+    console.log("RAW RESPONSE:", text);
+    const data = JSON.parse(text);
 
-    .catch(err => {
-      console.error(err);
-      alert("Submission failed");
-    });
-}
+    if (!data.success) {
+      alert(data.message || "Submission failed.");
+      return;
+    }
+
+    window.location.href = "submitted.html";
+  })
+  .catch(err => {
+    console.error(err);
+    alert("Submission failed");
+  });
 </script>
 
 </body>
