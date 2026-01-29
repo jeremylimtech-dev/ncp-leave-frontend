@@ -13,7 +13,12 @@
   <input type="text" id="username" placeholder="Username">
   <input type="password" id="password" placeholder="Password">
 
-  <button class="primary-btn" onclick="loginAdmin()">Login</button>
+  <button
+    id="loginBtn"
+    class="primary-btn"
+    onclick="loginAdmin()">
+    Login
+  </button>
 </div>
 
 <script>
@@ -23,11 +28,17 @@ const SCRIPT_URL =
 function loginAdmin() {
   const username = document.getElementById("username").value.trim();
   const password = document.getElementById("password").value.trim();
+  const btn = document.getElementById("loginBtn");
 
   if (!username || !password) {
     alert("Please enter username and password");
     return;
   }
+
+  // 🔄 loading state
+  btn.disabled = true;
+  btn.classList.add("loading");
+  btn.innerHTML = "Logging in…";
 
   const formData = new FormData();
   formData.append("username", username);
@@ -40,24 +51,23 @@ function loginAdmin() {
     .then(res => res.json())
     .then(data => {
       if (!data.success) {
-        alert("Invalid credentials or inactive account.");
-        return;
+        throw new Error("Invalid credentials or inactive account");
       }
 
-      // ✅ STORE ADMIN SESSION
       localStorage.setItem("isAdmin", "true");
       localStorage.setItem("adminName", data.name);
 
-      // ✅ GO TO DASHBOARD
       window.location.href = "admin-dashboard.html";
     })
     .catch(err => {
-      console.error(err);
-      alert("Login failed. Please try again.");
+      alert(err.message);
+
+      btn.disabled = false;
+      btn.classList.remove("loading");
+      btn.innerHTML = "Login";
     });
 }
 </script>
-
 
 </body>
 </html>
