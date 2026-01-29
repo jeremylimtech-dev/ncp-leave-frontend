@@ -125,15 +125,15 @@ function submitLeave() {
 function sendPayload(payload) {
   const formData = new FormData();
 
-  for (const key in payload) {
+  Object.keys(payload).forEach(key => {
     if (payload[key] !== undefined && payload[key] !== null) {
       formData.append(key, payload[key]);
     }
-  }
+  });
 
   fetch(SCRIPT_URL, {
     method: "POST",
-    body: formData   // ✅ NO headers, NO JSON
+    body: formData   // ✅ NO headers
   })
     .then(res => res.text())
     .then(text => {
