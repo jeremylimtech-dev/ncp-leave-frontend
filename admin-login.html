@@ -13,16 +13,7 @@
   <input type="text" id="username" placeholder="Username">
   <input type="password" id="password" placeholder="Password">
 
-  <button id="loginBtn" class="primary-btn" onclick="login()">Login</button>
-  <button class="secondary-btn" onclick="goBack()">Back</button>
-</div>
-
-<!-- Modal -->
-<div id="modal-overlay" class="modal-overlay">
-  <div class="modal">
-    <p id="modal-message"></p>
-    <button class="primary-btn" onclick="closeModal()">OK</button>
-  </div>
+  <button class="primary-btn" onclick="login()">Login</button>
 </div>
 
 <script>
@@ -32,61 +23,15 @@ const SCRIPT_URL =
 function login() {
   const username = document.getElementById("username").value.trim();
   const password = document.getElementById("password").value.trim();
-  const btn = document.getElementById("loginBtn");
 
   if (!username || !password) {
-    showModal("Please enter username and password.");
+    alert("Please enter username and password.");
     return;
   }
 
-  // 🔄 SHOW LOADING STATE
-  btn.classList.add("loading");
-  btn.innerHTML = `<span class="spinner"></span>Logging in...`;
-
-  // ✅ Force browser repaint so spinner is visible
-  requestAnimationFrame(() => {
-    fetch(SCRIPT_URL, {
-      method: "POST",
-      body: new URLSearchParams({ username, password })
-    })
-    .then(res => res.json())
-    .then(data => {
-      if (data.success) {
-        localStorage.setItem("isAdmin", "true");
-        localStorage.setItem("adminName", data.name);
-
-        // ⏳ Small delay so user SEES success animation
-        setTimeout(() => {
-          window.location.href = "admin-dashboard.html";
-        }, 600);
-      } else {
-        resetButton();
-        showModal("Invalid credentials or inactive account.");
-      }
-    })
-    .catch(() => {
-      resetButton();
-      showModal("Login failed. Please try again.");
-    });
-  });
-
-  function resetButton() {
-    btn.classList.remove("loading");
-    btn.innerHTML = "Login";
-  }
-}
-
-function goBack() {
-  window.location.href = "index.html";
-}
-
-function showModal(msg) {
-  document.getElementById("modal-message").innerText = msg;
-  document.getElementById("modal-overlay").style.display = "flex";
-}
-
-function closeModal() {
-  document.getElementById("modal-overlay").style.display = "none";
+  // 🔁 REDIRECT — NOT fetch()
+  window.location.href =
+    `${SCRIPT_URL}?login=admin&username=${encodeURIComponent(username)}&password=${encodeURIComponent(password)}`;
 }
 </script>
 
