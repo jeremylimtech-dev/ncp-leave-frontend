@@ -72,42 +72,46 @@ function submitLeave() {
   const start = startDate.value;
   const end = endDate.value;
   const reason = document.getElementById("reason").value;
-  const fileInput = document.getElementById("attachment");
+  const file = attachment.files[0];
 
   if (!start || !end) {
-    alert("Please select leave dates.");
+    alert("Please select dates");
     return;
   }
 
-  const formData = new FormData();
-  formData.append("action", "submitLeave");
-  formData.append("name", localStorage.getItem("employeeName"));
-  formData.append("type", localStorage.getItem("leaveType"));
-  formData.append("balance", balance.value);
-  formData.append("start", start);
-  formData.append("end", end);
-  formData.append("reason", reason);
-
-  if (fileInput.files.length) {
-    formData.append("attachment", fileInput.files[0]); // ✅ RAW FILE
+  if (file && file.size > 3 * 1024 * 1024) {
+    alert("Max file size is 3MB");
+    return;
   }
 
-  fetch(SCRIPT_URL, {
-    method: "POST",
-    body: formData
-  })
-    .then(r => r.json())
-    .then(data => {
-      if (!data.success) {
-        alert(data.message || "File upload failed");
-        return;
-      }
-      window.location.href = "submitted.html";
-    })
-    .catch(err => {
-      console.error(err);
-      alert("Submission failed.");
+  if (file) {
+    const reader = new FileReader();
+    reader.onload = () => {
+      sendPayload({
+        action: "submitLeave",
+        name: localStorage.getItem("employeeName"),
+        type: localStorage.getItem("leaveType"),
+        balance: balance.value,
+        start,
+        end,
+        reason,
+        fileName: file.name,
+        fileType: file.type,
+        fileData: reader.result.split(",")[1]
+      });
+    };
+    reader.readAsDataURL(file);
+  } else {
+    sendPayload({
+      action: "submitLeave",
+      name: localStorage.getItem("employeeName"),
+      type: localStorage.getItem("leaveType"),
+      balance: balance.value,
+      start,
+      end,
+      reason
     });
+  }
 }
 
 /* =====================
@@ -115,31 +119,20 @@ function submitLeave() {
    (CORS-SAFE)
 ===================== */
 function sendPayload(payload) {
-  const formData = new FormData();
-
-  Object.keys(payload).forEach(key => {
-    if (payload[key] !== undefined && payload[key] !== null) {
-      formData.append(key, payload[key]);
-    }
-  });
-
   fetch(SCRIPT_URL, {
     method: "POST",
-    body: formData   // ✅ NO headers
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(payload)
   })
-    .then(res => res.text())
-    .then(text => {
-      const data = JSON.parse(text);
-      if (!data.success) {
-        alert(data.message || "Submission failed.");
+    .then(r => r.json())
+    .then(res => {
+      if (!res.success) {
+        alert(res.message || "Upload failed");
         return;
       }
       window.location.href = "submitted.html";
     })
-    .catch(err => {
-      console.error(err);
-      alert("Submission failed. Please try again.");
-    });
+    .catch(() => alert("Network error"));
 }
 </script>
 
