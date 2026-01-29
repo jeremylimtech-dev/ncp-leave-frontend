@@ -121,18 +121,23 @@ function submitLeave() {
 function sendPayload(payload) {
   fetch(SCRIPT_URL, {
     method: "POST",
-    headers: { "Content-Type": "application/json" },
+    headers: {
+      "Content-Type": "application/json"
+    },
     body: JSON.stringify(payload)
   })
-    .then(r => r.json())
-    .then(res => {
-      if (!res.success) {
-        alert(res.message || "Upload failed");
+    .then(res => res.json())
+    .then(data => {
+      if (!data.success) {
+        alert(data.message || "Submission failed");
         return;
       }
       window.location.href = "submitted.html";
     })
-    .catch(() => alert("Network error"));
+    .catch(err => {
+      console.error(err);
+      alert("Submission failed");
+    });
 }
 </script>
 
