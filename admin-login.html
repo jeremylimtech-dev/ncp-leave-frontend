@@ -13,17 +13,24 @@
   <input type="text" id="username" placeholder="Username">
   <input type="password" id="password" placeholder="Password">
 
-  <button
-    id="loginBtn"
-    class="primary-btn"
-    onclick="loginAdmin()">
-    Login
-  </button>
+	<button class="primary-btn" onclick="loginAdmin()" id="loginBtn">
+		Login
+	</button>
+
+	<button class="primary-btn" onclick="goHome()" style="margin-top: 10px;">
+		Back
+	</button>
+
 </div>
 
 <script>
 const SCRIPT_URL =
   "https://script.google.com/macros/s/AKfycbz4zMRShI6IwL7ehez3Q9VX_ysMQb3Otv__59tgoe5-91zfEN1THvLSJjty_TCN24Wp/exec";
+
+function goHome() {
+	window.location.href =
+		"https://jeremylimtech-dev.github.io/ncp-leave-frontend/";
+	}
 
 function loginAdmin() {
   const username = document.getElementById("username").value.trim();
