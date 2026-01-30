@@ -1,1 +1,1 @@
-https://jeremylimtech-dev.github.io/ncp-leave-frontend/
+https://jeremylimtech-dev.github.io/NCP-Leave-Request/
