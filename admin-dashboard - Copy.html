@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Admin Dashboard</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+<!-- HEADER -->
+<div class="admin-header">
+  <div class="admin-left">
+    Admin: <span id="adminName"></span>
+  </div>
+
+  <div class="admin-center">
+    <div class="admin-title">Admin Dashboard</div>
+    <div class="admin-subtitle">Pending Leave Requests</div>
+  </div>
+
+  <div class="admin-right">
+    <button class="secondary-btn" onclick="logoutAdmin()">Logout</button>
+  </div>
+</div>
+
+<!-- MAIN CONTAINER -->
+<div class="container" style="width: 900px; margin-top: 100px;">
+  <div id="no-requests" class="empty-state" style="display:none;">
+    No pending leave requests 🎉
+  </div>
+
+  <div id="requests"></div>
+</div>
+
+<!-- MODAL -->
+<div id="modal-overlay" class="modal-overlay">
+  <div class="modal">
+    <p id="modal-message"></p>
+    <button class="primary-btn" onclick="closeModal()">OK</button>
+  </div>
+</div>
+
+<script>
+/* =========================
+   CONFIG
+========================= */
+const SCRIPT_URL =
+  "https://script.google.com/macros/s/AKfycbz4zMRShI6IwL7ehez3Q9VX_ysMQb3Otv__59tgoe5-91zfEN1THvLSJjty_TCN24Wp/exec";
+  
+const adminName = localStorage.getItem("adminName");
+document.getElementById("adminName").innerText = adminName || "Admin";
+
+/* =========================
+   AUTH GUARD
+========================= */
+if (localStorage.getItem("isAdmin") !== "true") {
+  window.location.replace("admin-login.html");
+}
+
+document.getElementById("adminName").innerText =
+  localStorage.getItem("adminName") || "Admin";
+
+const container = document.getElementById("requests");
+const emptyState = document.getElementById("no-requests");
+
+/* =========================
+   LOAD PENDING LEAVES
+========================= */
+fetch(SCRIPT_URL + "?action=getPendingLeaves")
+  .then(res => res.json())
+  .then(data => {
+    if (!data.success || data.leaves.length === 0) {
+      emptyState.style.display = "block";
+      return;
+    }
+
+    data.leaves.forEach(l => {
+      const days = calculateDays(l.start, l.end);
+
+      const card = document.createElement("div");
+      card.className = "request-card";
+
+      card.innerHTML = `
+        <div class="request-header">
+          <div class="employee-name">${l.name}</div>
+          <span class="status pending">Pending</span>
+        </div>
+
+        <div class="request-body">
+          <div class="leave-type">${l.type} Leave</div>
+          <div class="dates">
+            ${formatDate(l.start)} → ${formatDate(l.end)}
+            <span class="days">(${days} days)</span>
+          </div>
+          <div class="balance">${l.balance}</div>
+          <div class="reason">Reason: ${l.reason || "-"}</div>
+        </div>
+
+        <div class="request-actions">
+          <button class="primary-btn"
+            onclick="updateStatus(${l.rowIndex}, 'Approved', this)">
+            Approve
+          </button>
+
+          <button class="secondary-btn"
+            onclick="updateStatus(${l.rowIndex}, 'Rejected', this)">
+            Reject
+          </button>
+        </div>
+      `;
+
+      container.appendChild(card);
+    });
+  });
+
+/* =========================
+   UPDATE STATUS
+========================= */
+function updateStatus(rowIndex, status, btn) {
+  btn.disabled = true;
+
+  const formData = new FormData();
+  formData.append("action", "updateLeaveStatus");
+  formData.append("rowIndex", rowIndex);
+  formData.append("status", status);
+  formData.append("adminName", localStorage.getItem("adminName"));
+
+  fetch(SCRIPT_URL, {
+    method: "POST",
+    body: formData
+  })
+    .then(res => res.json())
+    .then(data => {
+      if (!data.success) {
+        alert("Failed to update status");
+        btn.disabled = false;
+        return;
+      }
+
+      btn.closest(".request-card").remove();
+
+      if (container.children.length === 0) {
+        emptyState.style.display = "block";
+      }
+
+      showModal("Leave request " + status);
+    });
+}
+
+/* =========================
+   HELPERS
+========================= */
+function formatDate(d) {
+  return new Date(d).toLocaleDateString();
+}
+
+function calculateDays(start, end) {
+  const s = new Date(start);
+  const e = new Date(end);
+  return Math.round((e - s) / (1000 * 60 * 60 * 24)) + 1;
+}
+
+function showModal(msg) {
+  document.getElementById("modal-message").innerText = msg;
+  document.getElementById("modal-overlay").style.display = "flex";
+}
+
+function closeModal() {
+  document.getElementById("modal-overlay").style.display = "none";
+}
+
+function logoutAdmin() {
+  localStorage.clear();
+  window.location.replace("admin-login.html");
+}
+</script>
+
+</body>
+</html>
