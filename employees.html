@@ -21,14 +21,27 @@
   <div class="admin-center"></div>
 
   <div class="admin-right">
-  	<button class="secondary-btn" onclick="addEmployee()">Add</button>
+    <button class="secondary-btn" onclick="addEmployee()">Add</button>
     <button class="secondary-btn" onclick="goBack()">Back</button>
   </div>
 </div>
 
-<!-- EMPLOYEE GRID -->
-<div class="employee-grid" id="employeeGrid"></div>
+<!-- PAGE LOADING -->
+<div id="pageLoader" class="loading-state">
+  <div class="page-spinner"></div>
+  <div class="loading-text">Loading employees</div>
+</div>
 
+<!-- FETCH LOADER (FULL SCREEN BEFORE MODAL) -->
+<div id="fetchLoader" class="modal-overlay">
+  <div class="loading-state">
+    <div class="page-spinner"></div>
+    <div class="loading-text">Loading employee</div>
+  </div>
+</div>
+
+<!-- EMPLOYEE GRID -->
+<div class="employee-grid" id="employeeGrid" style="display:none;"></div>
 
 <!-- EMPLOYEE MODAL -->
 <div class="modal-overlay" id="employeeModal">
@@ -37,13 +50,13 @@
       <img src="avatar.png" alt="Avatar">
     </div>
 
-    <h2 id="modalName">Name</h2>
+    <h2 id="modalName">Employee</h2>
 
     <button class="primary-btn" onclick="editEmployee()">Edit Employee</button>
     <button class="primary-btn" onclick="viewStatus()">Status</button>
     <button class="primary-btn" onclick="viewDetails()">Details</button>
 
-    <button class="secondary-btn" onclick="closeModal()" style="margin-top:12px;">
+    <button class="primary-btn" onclick="closeModal()" style="margin-top:12px;">
       Close
     </button>
   </div>
@@ -54,51 +67,109 @@ const SCRIPT_URL =
   "https://script.google.com/macros/s/AKfycbz4zMRShI6IwL7ehez3Q9VX_ysMQb3Otv__59tgoe5-91zfEN1THvLSJjty_TCN24Wp/exec";
 
 function addEmployee() {
-  window.location.href="add-employee.html";
-  }
-  
+  window.location.href = "add-employee.html";
+}
+
 function goBack() {
   window.history.back();
 }
+
+/* =====================
+   LOAD EMPLOYEES
+===================== */
+const pageLoader = document.getElementById("pageLoader");
+const grid = document.getElementById("employeeGrid");
 
 fetch(`${SCRIPT_URL}?action=getEmployees`)
   .then(res => res.json())
   .then(data => {
     if (!data.success) throw new Error("Failed to load employees");
 
-    const grid = document.getElementById("employeeGrid");
+    setTimeout(() => {
+      pageLoader.style.display = "none";
+      grid.style.display = "grid";
 
-    data.employees.forEach(emp => {
-      const btn = document.createElement("button");
-      btn.className = "employee-btn";
-      btn.textContent = emp.name;
-      btn.onclick = () => openEmployee(emp.id);
-      grid.appendChild(btn);
-    });
+      if (data.employees.length === 0) {
+        pageLoader.style.display = "flex";
+        pageLoader.querySelector(".loading-text").textContent =
+          "No employees found";
+        return;
+      }
+
+      data.employees.forEach(emp => {
+        const btn = document.createElement("button");
+        btn.className = "employee-btn";
+        btn.textContent = emp.name;
+        btn.onclick = () => openEmployee(emp.id);
+        grid.appendChild(btn);
+      });
+    }, 300);
   })
-  .catch(err => alert(err.message));
+  .catch(err => {
+    pageLoader.querySelector(".loading-text").textContent =
+      "Unable to load employees";
+    console.error(err);
+  });
 
+/* =====================
+   EMPLOYEE MODAL FLOW
+===================== */
 let selectedEmployeeId = "";
 
 function openEmployee(id) {
+  selectedEmployeeId = id;
+
+  const loader = document.getElementById("fetchLoader");
+  const modal = document.getElementById("employeeModal");
+
+  // Reset modal state
+  modal.classList.remove("show");
+  modal.style.display = "none";
+
+  // Show loader first
+  loader.style.display = "flex";
+  loader.classList.add("show");
+
   fetch(`${SCRIPT_URL}?action=getEmployee&id=${id}`)
     .then(res => res.json())
     .then(data => {
       if (!data.success) throw new Error("Employee not found");
 
-      selectedEmployeeId = id;
       document.getElementById("modalName").textContent =
         data.employee.name;
 
-      document.getElementById("employeeModal").style.display = "flex";
-    })
-    .catch(err => alert(err.message));
-}
+      // Hide loader → then show modal
+      loader.classList.remove("show");
+      setTimeout(() => {
+        loader.style.display = "none";
 
+        modal.style.display = "flex";
+        requestAnimationFrame(() => {
+          modal.classList.add("show");
+        });
+      }, 200);
+    })
+    .catch(err => {
+      loader.style.display = "none";
+      alert(err.message);
+    });
+}
 
 function closeModal() {
-  document.getElementById("employeeModal").style.display = "none";
+  const modal = document.getElementById("employeeModal");
+  modal.classList.remove("show");
+
+  setTimeout(() => {
+    modal.style.display = "none";
+  }, 250);
 }
+
+// Click outside modal closes it
+document.getElementById("employeeModal").addEventListener("click", e => {
+  if (e.target.id === "employeeModal") {
+    closeModal();
+  }
+});
 
 function editEmployee() {
   window.location.href =
@@ -112,7 +183,6 @@ function viewStatus() {
 function viewDetails() {
   alert("Details feature coming soon");
 }
-
 </script>
 
 </body>
