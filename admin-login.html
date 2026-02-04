@@ -62,6 +62,7 @@ function loginAdmin() {
   btn.innerHTML = "Logging in…";
 
   const formData = new FormData();
+  formData.append("action", "loginAdmin");
   formData.append("username", username);
   formData.append("password", password);
 
@@ -72,7 +73,7 @@ function loginAdmin() {
     .then(res => res.json())
     .then(data => {
       if (!data.success) {
-        throw new Error("Invalid credentials or inactive account");
+        throw new Error(data.message || "Login failed");
       }
 
       localStorage.setItem("isAdmin", "true");
