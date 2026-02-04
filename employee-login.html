@@ -94,8 +94,9 @@ function contactAdmin() {
 }
 
 /* Send token to Apps Script */
-function verifyEmployee(idToken) 
-	console.log("TOKEN RECEIVED:", token.substring(0, 20));
+function verifyEmployee(idToken) {
+  console.log("TOKEN RECEIVED:", idToken.substring(0, 20));
+
   const body = new URLSearchParams({
     action: "verifyEmployeeGoogle",
     token: idToken
@@ -105,7 +106,7 @@ function verifyEmployee(idToken)
     method: "POST",
     body: body
   })
-    .then(res => res.json()) // 🔑 THIS WAS MISSING
+    .then(res => res.json())
     .then(data => {
       console.log("DEBUG DATA:", data);
 
@@ -130,6 +131,7 @@ function verifyEmployee(idToken)
       resetLoginUI();
     });
 }
+
 
 
 function resetLoginUI() {
