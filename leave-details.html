@@ -15,6 +15,14 @@
     <input type="text" id="employeeName" readonly />
   </div>
 
+	<div class="field-group">
+		<label>Leave type</label>
+		<select id="leaveType">
+			<option value="Sick">Sick Leave</option>
+			<option value="Annual">Annual Leave</option>
+		</select>
+	</div>
+
   <div class="field-group">
     <label>Available Balance</label>
     <input type="text" id="balance" readonly />
@@ -74,13 +82,12 @@ let availableBalanceHours = 0;
 (async function init() {
   const employeeId = localStorage.getItem("employeeId");
   const name = localStorage.getItem("employeeName");
-  const leaveType = localStorage.getItem("leaveType");
-
-  if (!employeeId || !leaveType) {
-    alert("Session expired. Please login again.");
-    window.location.href = "employee-login.html";
-    return;
-  }
+  
+  if (!employeeId || !name) {
+  alert("Session expired. Please login again.");
+  window.location.href = "employee-login.html";
+  return;
+ }
 
   employeeName.value = name;
   balance.value = "Loading balance…";
