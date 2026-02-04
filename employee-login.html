@@ -104,17 +104,17 @@ function verifyEmployee(idToken) {
     method: "POST",
     body: body
   })
-  .then(res => res.text())
-  .then(text => {
-    console.log("RAW RESPONSE:", text);
+	.then(data => {
+	console.log("DEBUG DATA:", data);
 
-    const data = JSON.parse(text);
-
-    if (!data.success) {
-      alert("Access denied. Email not registered.");
-      resetLoginUI();
-      return;
-    }
+	if (!data.success) {
+		alert(
+		"Login failed:\n" +
+		JSON.stringify(data.debug, null, 2)
+		);
+		resetLoginUI();
+		return;
+	}
 
     localStorage.setItem("employeeId", data.employee.id);
     localStorage.setItem("employeeName", data.employee.name);
