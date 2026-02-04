@@ -719,6 +719,87 @@ body.no-center {
   opacity: 0.85;
 }
 
+.leave-card {
+  max-width: 420px;
+  padding: 28px;
+}
+
+.card-title {
+  text-align: center;
+  margin-bottom: 24px;
+}
+
+.field-group {
+  display: flex;
+  flex-direction: column;
+  margin-bottom: 14px;
+}
+
+.field-group label {
+  font-size: 13px;
+  opacity: 0.8;
+  margin-bottom: 6px;
+}
+
+.field-group input,
+.field-group select,
+.field-group textarea {
+  width: 100%;
+}
+
+.row {
+  display: flex;
+  gap: 12px;
+}
+
+.row .field-group {
+  flex: 1;
+}
+
+#totalHours {
+  font-weight: 600;
+  background: rgba(255,255,255,0.9);
+}
+
+.hint-text {
+  font-size: 12px;
+  opacity: 0.75;
+  margin-top: 12px;
+  text-align: center;
+}
+
+.hours-toggle {
+  display: flex;
+  gap: 10px;
+}
+
+.hours-btn {
+  flex: 1;
+  padding: 12px 10px;
+  border-radius: 10px;
+  background: rgba(255,255,255,0.12);
+  color: white;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: 0.2s;
+  line-height: 1.2;
+}
+
+.hours-btn span {
+  font-size: 11px;
+  opacity: 0.8;
+  font-weight: 500;
+}
+
+.hours-btn:hover {
+  background: rgba(255,255,255,0.2);
+}
+
+.hours-btn.active {
+  background: #1f4ed8;
+  box-shadow: 0 6px 18px rgba(31, 78, 216, 0.45);
+}
 
 
 
