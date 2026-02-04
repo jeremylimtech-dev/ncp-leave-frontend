@@ -10,33 +10,37 @@
 <div class="container leave-card">
   <h1 class="card-title">Leave Details</h1>
 
+  <!-- Employee -->
   <div class="field-group">
     <label>Employee</label>
     <input type="text" id="employeeName" readonly />
   </div>
 
-    <div class="field-group">
-  <label>Leave type</label>
-  <div class="leave-options">
-    <div class="leave-btn active" onclick="setLeaveType('Sick', this)">
-      Sick Leave
-    </div>
-    <div class="leave-btn" onclick="setLeaveType('Annual', this)">
-      Annual Leave
-    </div>
-    <div class="leave-btn" onclick="setLeaveType('Unpaid', this)">
-      Unpaid Leave
+  <!-- Leave type -->
+  <div class="field-group">
+    <label>Leave type</label>
+    <div class="leave-options leave-type-options">
+      <div class="leave-btn active" onclick="setLeaveType('Sick', this)">
+        Sick Leave
+      </div>
+      <div class="leave-btn" onclick="setLeaveType('Annual', this)">
+        Annual Leave
+      </div>
+      <div class="leave-btn" onclick="setLeaveType('Unpaid', this)">
+        Unpaid Leave
+      </div>
     </div>
   </div>
-</div>
 
-<input type="hidden" id="leaveType" value="Sick">
+  <input type="hidden" id="leaveType" value="Sick">
 
+  <!-- Balance -->
   <div class="field-group">
     <label>Available balance</label>
     <input type="text" id="balance" readonly />
   </div>
 
+  <!-- Dates -->
   <div class="row">
     <div class="field-group">
       <label>Start date</label>
@@ -49,9 +53,10 @@
     </div>
   </div>
 
+  <!-- Hours per day -->
   <div class="field-group">
     <label>Hours per day</label>
-    <div class="leave-options">
+    <div class="leave-options hours-options">
       <div class="leave-btn active" onclick="setHours(8, this)">
         Full day<br /><small>8 hours</small>
       </div>
@@ -61,11 +66,13 @@
     </div>
   </div>
 
+  <!-- Total -->
   <div class="field-group">
     <label>Total leave hours</label>
     <input type="text" id="totalHours" readonly placeholder="—" />
   </div>
 
+  <!-- Reason -->
   <div class="field-group">
     <label>Reason</label>
     <textarea id="reason" placeholder="Brief explanation"></textarea>
@@ -99,11 +106,23 @@ let availableBalanceHours = 0;
   }
 
   employeeName.value = name;
-
   await loadBalance();
-
-  leaveType.addEventListener("change", loadBalance);
 })();
+
+/* =====================
+   SET LEAVE TYPE
+===================== */
+function setLeaveType(type, btn) {
+  leaveType.value = type;
+
+  document
+    .querySelectorAll(".leave-type-options .leave-btn")
+    .forEach(b => b.classList.remove("active"));
+
+  btn.classList.add("active");
+
+  loadBalance();
+}
 
 /* =====================
    LOAD BALANCE
@@ -111,6 +130,14 @@ let availableBalanceHours = 0;
 async function loadBalance() {
   const employeeId = localStorage.getItem("employeeId");
   const type = leaveType.value;
+
+  // ✅ UNPAID = UNLIMITED
+  if (type === "Unpaid") {
+    availableBalanceHours = Infinity;
+    balance.value = "Unpaid Leave: Unlimited";
+    calculateTotal();
+    return;
+  }
 
   balance.value = "Loading…";
 
@@ -121,6 +148,7 @@ async function loadBalance() {
 
   if (!data.success) {
     balance.value = "Unable to load balance";
+    availableBalanceHours = 0;
     return;
   }
 
@@ -136,11 +164,11 @@ async function loadBalance() {
 function setHours(hours, btn) {
   hoursPerDay = hours;
 
-  document.querySelectorAll(".leave-btn")
+  document
+    .querySelectorAll(".hours-options .leave-btn")
     .forEach(b => b.classList.remove("active"));
 
   btn.classList.add("active");
-
   calculateTotal();
 }
 
@@ -152,7 +180,10 @@ function setHours(hours, btn) {
 );
 
 function calculateTotal() {
-  if (!startDate.value || !endDate.value) return;
+  if (!startDate.value || !endDate.value) {
+    totalHours.value = "—";
+    return;
+  }
 
   const s = new Date(startDate.value);
   const e = new Date(endDate.value);
@@ -176,8 +207,10 @@ function submitLeave() {
   }
 
   const total = Number(totalHours.value.replace(" hours", ""));
+  const type = leaveType.value;
 
-  if (total > availableBalanceHours) {
+  // ✅ BLOCK ONLY PAID LEAVES
+  if (type !== "Unpaid" && total > availableBalanceHours) {
     alert(
       `Insufficient balance.\n\nRequested: ${total} hours\nAvailable: ${availableBalanceHours} hours`
     );
@@ -187,7 +220,7 @@ function submitLeave() {
   const payload = {
     action: "submitLeave",
     employeeId: localStorage.getItem("employeeId"),
-    leaveType: leaveType.value,
+    leaveType: type,
     startDate: startDate.value,
     endDate: endDate.value,
     hoursPerDay,
