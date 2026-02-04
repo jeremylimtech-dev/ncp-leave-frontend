@@ -15,13 +15,22 @@
     <input type="text" id="employeeName" readonly />
   </div>
 
-  <div class="field-group">
-    <label>Leave type</label>
-    <select id="leaveType">
-      <option value="Sick">Sick Leave</option>
-      <option value="Annual">Annual Leave</option>
-    </select>
+    <div class="field-group">
+  <label>Leave type</label>
+  <div class="leave-options">
+    <div class="leave-btn active" onclick="setLeaveType('Sick', this)">
+      Sick Leave
+    </div>
+    <div class="leave-btn" onclick="setLeaveType('Annual', this)">
+      Annual Leave
+    </div>
+    <div class="leave-btn" onclick="setLeaveType('Unpaid', this)">
+      Unpaid Leave
+    </div>
   </div>
+</div>
+
+<input type="hidden" id="leaveType" value="Sick">
 
   <div class="field-group">
     <label>Available balance</label>
