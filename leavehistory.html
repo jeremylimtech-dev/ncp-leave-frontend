@@ -24,10 +24,21 @@
 </div>
 
 <script>
+const token = sessionStorage.getItem("employeeToken");
 
-const employeeId = new URLSearchParams(window.location.search).get("id");
+if (!token) {
+  alert("Session expired. Please log in again.");
+  window.location.href = "employee-login.html";
+}
 
-fetch(`${SCRIPT_URL}?action=getLeaveHistory&employeeId=${employeeId}`)
+// 🔐 SECURE FETCH (NO employeeId, NO URL params)
+fetch(SCRIPT_URL, {
+  method: "POST",
+  body: new URLSearchParams({
+    action: "getLeaveHistorySecure",
+    token
+  })
+})
   .then(res => res.json())
   .then(res => {
     document.getElementById("historyLoading").classList.add("hidden");
@@ -38,6 +49,7 @@ fetch(`${SCRIPT_URL}?action=getLeaveHistory&employeeId=${employeeId}`)
     }
 
     const list = document.getElementById("leaveList");
+    list.innerHTML = "";
 
     res.data.forEach(l => {
       const card = document.createElement("div");
@@ -60,10 +72,16 @@ fetch(`${SCRIPT_URL}?action=getLeaveHistory&employeeId=${employeeId}`)
 
       list.appendChild(card);
     });
+  })
+  .catch(err => {
+    console.error(err);
+    document.getElementById("historyLoading").textContent =
+      "Failed to load leave history";
   });
-
-
+  
+  
 </script>
+
 
 </body>
 </html>
