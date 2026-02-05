@@ -52,7 +52,9 @@
 const SCRIPT_URL =
   "https://script.google.com/macros/s/AKfycbz4zMRShI6IwL7ehez3Q9VX_ysMQb3Otv__59tgoe5-91zfEN1THvLSJjty_TCN24Wp/exec";
 
-/* Navigation */
+/* =====================
+   NAVIGATION
+===================== */
 function goBack() {
   if (document.referrer) {
     window.history.back();
@@ -65,7 +67,13 @@ function goAdmin() {
   window.location.href = "admin-login.html";
 }
 
-/* Google Login Callback */
+function contactAdmin() {
+  window.location.href = "mailto:admin@ncpbookkeeping.com";
+}
+
+/* =====================
+   GOOGLE LOGIN CALLBACK
+===================== */
 function handleCredentialResponse(response) {
   // show loading
   document.getElementById("googleBtn").classList.add("hidden");
@@ -74,13 +82,15 @@ function handleCredentialResponse(response) {
   verifyEmployee(response.credential);
 }
 
-/* Initialize Google Login */
+/* =====================
+   INIT GOOGLE LOGIN
+===================== */
 window.onload = function () {
   google.accounts.id.initialize({
     client_id: "14009431850-vkipfmcfkvtql27977rrcoq4e2uuif78.apps.googleusercontent.com",
-    callback: handleCredentialResponse
-	auto-select: false
-	cancel_on_tap_outsite: false
+    callback: handleCredentialResponse,
+    auto_select: false,            // ✅ FIXED
+    cancel_on_tap_outside: false   // ✅ FIXED
   });
 
   google.accounts.id.renderButton(
@@ -91,13 +101,14 @@ window.onload = function () {
       width: 260
     }
   );
+
+  // ✅ Force account chooser every time
+  google.accounts.id.prompt();
 };
 
-function contactAdmin() {
-  window.location.href = "mailto:admin@ncpbookkeeping.com";
-}
-
-/* Send token to Apps Script */
+/* =====================
+   VERIFY EMPLOYEE
+===================== */
 function verifyEmployee(idToken) {
   console.log("TOKEN RECEIVED:", idToken.substring(0, 20));
 
@@ -136,8 +147,9 @@ function verifyEmployee(idToken) {
     });
 }
 
-
-
+/* =====================
+   RESET UI
+===================== */
 function resetLoginUI() {
   document.getElementById("googleBtn").classList.remove("hidden");
   document.getElementById("googleLoading").classList.add("hidden");
