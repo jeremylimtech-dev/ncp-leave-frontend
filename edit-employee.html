@@ -118,37 +118,39 @@
 
     /* SAVE */
     document.getElementById("editEmployeeForm").addEventListener("submit", e => {
-      e.preventDefault();
+  e.preventDefault();
 
-      const payload = {
-        action: "updateEmployee",
-        id: document.getElementById("employeeId").value,
-        name: document.getElementById("name").value,
-        employeeType: document.getElementById("employeeType").value,
-        annual: document.getElementById("annualLeave").value,
-        sick: document.getElementById("sickLeave").value,
-        email: document.getElementById("email").value,
-        contact: document.getElementById("contact").value
-      };
+  const payload = new URLSearchParams({
+    action: "updateEmployee",
+    id: document.getElementById("employeeId").value,
+    name: document.getElementById("name").value,
+    employeeType: document.getElementById("employeeType").value,
+    annual: document.getElementById("annualLeave").value,
+    sick: document.getElementById("sickLeave").value,
+    email: document.getElementById("email").value,
+    contact: document.getElementById("contact").value
+  });
 
-      fetch(SCRIPT_URL, {
-        method: "POST",
-		headers: {
-			"Content-Type": "application/json"
-		},
-        body: JSON.stringify(payload)
-      })
-        .then(res => res.json())
-        .then(r => {
-          if (r.success) {
-            alert("Employee updated successfully");
-            window.location.href = "employees.html";
-          } else {
-            alert("Failed to update employee");
-          }
-        });
+  fetch(SCRIPT_URL, {
+    method: "POST",
+    body: payload
+  })
+    .then(res => res.json())
+    .then(r => {
+      if (r.success) {
+        alert("Employee updated successfully");
+        window.location.href = "employees.html";
+      } else {
+        alert("Failed to update employee");
+      }
+    })
+    .catch(err => {
+      console.error(err);
+      alert("Request failed");
     });
+});
   </script>
 
 </body>
 </html>
+
