@@ -8,6 +8,11 @@
   <link rel="shortcut icon" href="/ncpicon.ico" type="image/x-icon">
 </head>
 <body>
+	<!-- Page Loading State -->
+	<div id="pageLoading" class="loading-state hidden">
+	  <div class="page-spinner"></div>
+	  <div>Loading employee data…</div>
+	</div>
 
   <div class="container edit-employee-card">
     <h1>Edit Employee</h1>
@@ -65,7 +70,10 @@
         </div>
 
         <div class="actions edit-actions">
-			<button type="submit" class="primary-btn">Save Changes</button>
+			<button type="submit" class="primary-btn" id="saveBtn">
+				<span class="btn-text">Save Changes</span>
+ 				<span class="spinner hidden"></span>
+			</button>
 			<a href="employees.html" class="primary-btn cancel-primary">Cancel</a>
 		</div>
 
@@ -86,29 +94,41 @@
     }
 
     /* LOAD EMPLOYEE */
-    fetch(`${SCRIPT_URL}?action=getEmployee&id=${empId}`)
-      .then(res => res.json())
-      .then(res => {
-        if (!res.success) {
-          alert("Employee not found");
-          window.location.href = "employees.html";
-          return;
-        }
+    const pageLoading = document.getElementById("pageLoading");
 
-        const e = res.employee;
+// show page loader
+pageLoading.classList.remove("hidden");
 
-        document.getElementById("employeeId").value = e.id;
-        document.getElementById("name").value = e.name;
-        document.getElementById("employeeType").value = e.type;
-        document.getElementById("annualLeave").value = e.annual;
-        document.getElementById("sickLeave").value = e.sick;
-        document.getElementById("email").value = e.email;
-        document.getElementById("contact").value = e.contact;
+fetch(`${SCRIPT_URL}?action=getEmployee&id=${empId}`)
+  .then(res => res.json())
+  .then(res => {
+    if (!res.success) {
+      alert("Employee not found");
+      window.location.href = "employees.html";
+      return;
+    }
 
-        document.getElementById("employeeNameDisplay").textContent = e.name;
-        document.getElementById("employeePhoto").src =
-          e.photo || "avatar.png";
-      });
+    const e = res.employee;
+
+    document.getElementById("employeeId").value = e.id;
+    document.getElementById("name").value = e.name;
+    document.getElementById("employeeType").value = e.type;
+    document.getElementById("annualLeave").value = e.annual;
+    document.getElementById("sickLeave").value = e.sick;
+    document.getElementById("email").value = e.email;
+    document.getElementById("contact").value = e.contact;
+
+    document.getElementById("employeeNameDisplay").textContent = e.name;
+    document.getElementById("employeePhoto").src = e.photo || "avatar.png";
+  })
+  .catch(() => {
+    alert("Failed to load employee");
+    window.location.href = "employees.html";
+  })
+  .finally(() => {
+    // hide loader
+    pageLoading.classList.add("hidden");
+  });
 
     /* NAME LIVE UPDATE */
     document.getElementById("name").addEventListener("input", e => {
@@ -119,6 +139,15 @@
     /* SAVE */
     document.getElementById("editEmployeeForm").addEventListener("submit", e => {
   e.preventDefault();
+
+  const saveBtn = document.getElementById("saveBtn");
+  const btnText = saveBtn.querySelector(".btn-text");
+  const spinner = saveBtn.querySelector(".spinner");
+
+  // enable button loading
+  saveBtn.disabled = true;
+  btnText.textContent = "Saving…";
+  spinner.classList.remove("hidden");
 
   const payload = new URLSearchParams({
     action: "updateEmployee",
@@ -141,16 +170,22 @@
         alert("Employee updated successfully");
         window.location.href = "employees.html";
       } else {
-        alert("Failed to update employee");
+        throw new Error();
       }
     })
-    .catch(err => {
-      console.error(err);
-      alert("Request failed");
+    .catch(() => {
+      alert("Failed to update employee");
+
+      // reset button on failure
+      saveBtn.disabled = false;
+      btnText.textContent = "Save Changes";
+      spinner.classList.add("hidden");
     });
 });
+
   </script>
 
 </body>
 </html>
+
 
