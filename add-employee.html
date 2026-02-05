@@ -70,7 +70,11 @@ function goBack() {
 /* =====================
    SUBMIT EMPLOYEE
 ===================== */
+let creatingEmployee = false;
+
 function submitEmployee() {
+  if (creatingEmployee) return;
+
   const name = document.getElementById("name").value.trim();
   const contact = document.getElementById("contact").value.trim();
   const email = document.getElementById("email").value.trim();
@@ -80,30 +84,50 @@ function submitEmployee() {
     return;
   }
 
+  const btn = document.querySelector(".primary-btn");
+
+  // 🔒 Lock UI
+  creatingEmployee = true;
+  btn.disabled = true;
+  btn.innerText = "Creating…";
+  btn.style.opacity = "0.85";
+
   const data = new URLSearchParams({
     action: "addEmployee",
-    name: name,
-    contact: contact,
-    email: email,
-    employeeType: employeeType
+    name,
+    contact,
+    email,
+    employeeType
   });
 
   fetch(SCRIPT_URL, {
     method: "POST",
     body: data
   })
-  .then(res => res.json())
-  .then(res => {
-    if (!res.success) {
-      throw new Error(res.message || "Failed to add employee");
-    }
+    .then(res => res.json())
+    .then(res => {
+      if (!res.success) {
+        throw new Error(res.message || "Failed to add employee");
+      }
 
-    alert("Employee added successfully. Welcome email sent.");
-    window.location.href = "admin-dashboard.html";
-  })
-  .catch(err => {
-    alert(err.message);
-  });
+      // ✅ Success feedback
+      btn.innerText = "Employee Created ✓";
+      btn.style.background = "#22c55e";
+      btn.style.opacity = "1";
+
+      setTimeout(() => {
+        window.location.href = "admin-dashboard.html";
+      }, 800);
+    })
+    .catch(err => {
+      alert(err.message);
+
+      // 🔁 Reset UI
+      creatingEmployee = false;
+      btn.disabled = false;
+      btn.innerText = "Create Employee";
+      btn.style.opacity = "1";
+    });
 }
 </script>
 
