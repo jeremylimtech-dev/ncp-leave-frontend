@@ -8,6 +8,7 @@
   <link rel="shortcut icon" href="/ncpicon.ico" type="image/x-icon">
 </head>
 <body>
+
 <div class="admin-icon" onclick="goBack()">Back</div>
 
 <!-- HEADER -->
@@ -26,7 +27,7 @@
   <div class="loading-text">Loading employees</div>
 </div>
 
-<!-- FETCH LOADER (FULL SCREEN BEFORE MODAL) -->
+<!-- FETCH LOADER -->
 <div id="fetchLoader" class="modal-overlay">
   <div class="loading-state">
     <div class="page-spinner"></div>
@@ -41,7 +42,7 @@
 <div class="modal-overlay" id="employeeModal">
   <div class="employee-modal">
     <div class="avatar">
-      <img src="avatar.png" alt="Avatar">
+      <img id="modalAvatar" src="default-avatar.png" alt="Avatar">
     </div>
 
     <h2 id="modalName">Employee</h2>
@@ -60,12 +61,12 @@
 const SCRIPT_URL =
   "https://script.google.com/macros/s/AKfycbz4zMRShI6IwL7ehez3Q9VX_ysMQb3Otv__59tgoe5-91zfEN1THvLSJjty_TCN24Wp/exec";
 
-function addEmployee() {
-  window.location.href = "add-employee.html";
-}
-
 function goBack() {
   window.location.href = "admin-dashboard.html";
+}
+
+function addEmployee() {
+  window.location.href = "add-employee.html";
 }
 
 /* =====================
@@ -84,33 +85,31 @@ fetch(`${SCRIPT_URL}?action=getEmployees`)
       grid.style.display = "grid";
 
       if (data.employees.length === 0) {
-        employeeGrid.innerHTML = `
-        <div class="employee-btn add-employee" onclick="addEmployee()">
-          + Add Employee
-        </div>
-		`;
+        grid.innerHTML = `
+          <div class="employee-btn add-employee" onclick="addEmployee()">
+            + Add Employee
+          </div>
+        `;
         return;
       }
 
       data.employees.forEach(emp => {
-  const btn = document.createElement("button");
-  btn.className = "employee-btn";
-  btn.textContent = emp.name;
-  btn.onclick = () => openEmployee(emp.id);
-  grid.appendChild(btn);
-});
+        const btn = document.createElement("button");
+        btn.className = "employee-btn";
+        btn.textContent = emp.name;
+        btn.onclick = () => openEmployee(emp.id);
+        grid.appendChild(btn);
+      });
 
-/* ➕ ADD EMPLOYEE PILL */
-const addBtn = document.createElement("button");
-addBtn.className = "employee-btn add-employee";
-addBtn.innerHTML = "➕ Add Employee";
+      const addBtn = document.createElement("button");
+      addBtn.className = "employee-btn add-employee";
+      addBtn.innerHTML = "➕ Add Employee";
+      addBtn.onclick = e => {
+        e.stopPropagation();
+        addEmployee();
+      };
 
-addBtn.onclick = (e) => {
-  e.stopPropagation();
-  addEmployee();
-};
-
-grid.appendChild(addBtn);
+      grid.appendChild(addBtn);
     }, 300);
   })
   .catch(err => {
@@ -120,7 +119,7 @@ grid.appendChild(addBtn);
   });
 
 /* =====================
-   EMPLOYEE MODAL FLOW
+   EMPLOYEE MODAL
 ===================== */
 let selectedEmployeeId = "";
 
@@ -129,12 +128,11 @@ function openEmployee(id) {
 
   const loader = document.getElementById("fetchLoader");
   const modal = document.getElementById("employeeModal");
+  const avatar = document.getElementById("modalAvatar");
 
-  // Reset modal state
   modal.classList.remove("show");
   modal.style.display = "none";
 
-  // Show loader first
   loader.style.display = "flex";
   loader.classList.add("show");
 
@@ -146,15 +144,20 @@ function openEmployee(id) {
       document.getElementById("modalName").textContent =
         data.employee.name;
 
-      // Hide loader → then show modal
+      avatar.src =
+        data.employee.photo && data.employee.photo.trim()
+          ? data.employee.photo
+          : "default-avatar.png";
+
+      avatar.onerror = () => {
+        avatar.src = "default-avatar.png";
+      };
+
       loader.classList.remove("show");
       setTimeout(() => {
         loader.style.display = "none";
-
         modal.style.display = "flex";
-        requestAnimationFrame(() => {
-          modal.classList.add("show");
-        });
+        requestAnimationFrame(() => modal.classList.add("show"));
       }, 200);
     })
     .catch(err => {
@@ -166,17 +169,11 @@ function openEmployee(id) {
 function closeModal() {
   const modal = document.getElementById("employeeModal");
   modal.classList.remove("show");
-
-  setTimeout(() => {
-    modal.style.display = "none";
-  }, 250);
+  setTimeout(() => modal.style.display = "none", 250);
 }
 
-// Click outside modal closes it
 document.getElementById("employeeModal").addEventListener("click", e => {
-  if (e.target.id === "employeeModal") {
-    closeModal();
-  }
+  if (e.target.id === "employeeModal") closeModal();
 });
 
 function editEmployee() {
@@ -191,11 +188,6 @@ function viewStatus() {
 function viewDetails() {
   alert("Details feature coming soon");
 }
-
-function addEmployee() {
-  window.location.href = "add-employee.html";
-}
-
 </script>
 
 </body>
