@@ -95,25 +95,18 @@ let hoursPerDay = 8;
 let availableBalanceHours = 0;
 
 /* =====================
-   INIT
+   INIT (CORRECT)
 ===================== */
-(async function init() {
-  document.addEventListener("DOMContentLoaded", async () => {
-  const token = localStorage.getItem("employeeToken");
-  const name = localStorage.getItem("employeeName");
+const token = localStorage.getItem("employeeToken");
+const name = localStorage.getItem("employeeName");
 
-  if (!token || !name) {
-    alert("Session expired. Please login again.");
-    window.location.replace("employee-login.html");
-    return;
-  }
-
-  // populate employee name
+if (!token || !name) {
+  alert("Session expired. Please login again.");
+  window.location.replace("employee-login.html");
+} else {
   document.getElementById("employeeName").value = name;
-
-  // initial balance load
-  await loadBalance();
-});
+  loadBalance(); // 🔥 THIS WAS NEVER RUNNING BEFORE
+}
 
 /* =====================
    SET LEAVE TYPE
@@ -126,7 +119,6 @@ function setLeaveType(type, btn) {
     .forEach(b => b.classList.remove("active"));
 
   btn.classList.add("active");
-
   loadBalance();
 }
 
@@ -136,12 +128,6 @@ function setLeaveType(type, btn) {
 async function loadBalance() {
   const token = localStorage.getItem("employeeToken");
   const type = leaveType.value;
-
-  if (!token) {
-    alert("Session expired. Please login again.");
-    window.location.replace("employee-login.html");
-    return;
-  }
 
   if (type === "Unpaid") {
     availableBalanceHours = Infinity;
@@ -166,16 +152,13 @@ async function loadBalance() {
   if (!data.success) {
     console.error("Balance error:", data);
     balance.value = "Unable to load balance";
-    availableBalanceHours = 0;
     return;
   }
 
   availableBalanceHours = data.balanceHours;
   balance.value = `${type} Balance: ${availableBalanceHours} hours`;
-
   calculateTotal();
 }
-
 
 /* =====================
    HOURS PER DAY
