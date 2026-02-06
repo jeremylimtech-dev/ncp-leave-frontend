@@ -130,7 +130,7 @@ function setLeaveType(type, btn) {
    LOAD BALANCE
 ===================== */
 async function loadBalance() {
-  const token = sessionStorage.getItem("employeeToken");
+  const token = localStorage.getItem("employeeToken");
   const type = leaveType.value;
 
   if (type === "Unpaid") {
@@ -246,7 +246,7 @@ function submitLeave() {
 
 	const payload = {
 	action: "submitLeaveSecure",
-	token: sessionStorage.getItem("employeeToken"),
+	token: localStorage.getItem("employeeToken"),
 	leaveType: type,
 	startDate: startDate.value,
 	endDate: endDate.value,
