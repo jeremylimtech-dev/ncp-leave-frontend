@@ -52,6 +52,10 @@
 const SCRIPT_URL =
   "https://script.google.com/macros/s/AKfycbz4zMRShI6IwL7ehez3Q9VX_ysMQb3Otv__59tgoe5-91zfEN1THvLSJjty_TCN24Wp/exec";
 
+if (sessionStorage.getItem("employeeToken")) {
+  window.location.replace("employee-dashboard.html");
+}
+
 /* =====================
    NAVIGATION
 ===================== */
@@ -76,7 +80,7 @@ function handleCredentialResponse(response) {
   // show loading
   document.getElementById("googleBtn").classList.add("hidden");
   document.getElementById("googleLoading").classList.remove("hidden");
-
+	
   verifyEmployee(response.credential);
 }
 
@@ -87,8 +91,8 @@ window.onload = function () {
   google.accounts.id.initialize({
     client_id: "14009431850-vkipfmcfkvtql27977rrcoq4e2uuif78.apps.googleusercontent.com",
     callback: handleCredentialResponse,
-    auto_select: false,            // ✅ FIXED
-    cancel_on_tap_outside: false   // ✅ FIXED
+    auto_select: false,
+    cancel_on_tap_outside: true
   });
 
   google.accounts.id.renderButton(
@@ -99,10 +103,9 @@ window.onload = function () {
       width: 260
     }
   );
+};
 
   // ✅ Force account chooser every time
-  google.accounts.id.prompt();
-};
 
 /* =====================
    VERIFY EMPLOYEE
