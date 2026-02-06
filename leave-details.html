@@ -107,7 +107,7 @@ let availableBalanceHours = 0;
     return;
   }
 
-  employeeName.value = name;
+  document.getElementById("employeeName").value = name;
   await loadBalance();
 });
 
@@ -133,6 +133,12 @@ async function loadBalance() {
   const token = localStorage.getItem("employeeToken");
   const type = leaveType.value;
 
+  if (!token) {
+    alert("Session expired. Please login again.");
+    window.location.replace("employee-login.html");
+    return;
+  }
+
   if (type === "Unpaid") {
     availableBalanceHours = Infinity;
     balance.value = "Unpaid Leave: Unlimited";
@@ -154,6 +160,7 @@ async function loadBalance() {
   const data = await res.json();
 
   if (!data.success) {
+    console.error("Balance error:", data);
     balance.value = "Unable to load balance";
     availableBalanceHours = 0;
     return;
@@ -164,6 +171,7 @@ async function loadBalance() {
 
   calculateTotal();
 }
+
 
 /* =====================
    HOURS PER DAY
