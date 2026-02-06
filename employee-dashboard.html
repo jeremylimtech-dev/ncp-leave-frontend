@@ -39,25 +39,29 @@
 </div>
 
 <script>
-/* =====================
-   AUTH GUARD
-===================== */
-const employeeId = localStorage.getItem("employeeId");
-const employeeName = localStorage.getItem("employeeName");
-const employeeEmail = localStorage.getItem("employeeEmail");
+document.addEventListener("DOMContentLoaded", () => {
+  /* =====================
+     AUTH GUARD
+  ===================== */
+  const token = sessionStorage.getItem("employeeToken");
 
-if (!employeeId) {
-  window.location.href = "employee-login.html";
-}
+  if (!token) {
+    window.location.replace("employee-login.html");
+    return;
+  }
 
-/* =====================
-   DISPLAY INFO
-===================== */
-document.getElementById("employeeName").innerText =
-  employeeName || "Employee";
+  /* =====================
+     DISPLAY INFO
+  ===================== */
+  const employeeName = localStorage.getItem("employeeName");
+  const employeeEmail = localStorage.getItem("employeeEmail");
 
-document.getElementById("employeeEmail").innerText =
-  employeeEmail || "";
+  document.getElementById("employeeName").innerText =
+    employeeName || "Employee";
+
+  document.getElementById("employeeEmail").innerText =
+    employeeEmail || "";
+});
 
 /* =====================
    NAVIGATION
@@ -71,10 +75,12 @@ function goMyLeaves() {
 }
 
 function logout() {
-  localStorage.removeItem("employeeId");
+  // ✅ CLEAR CORRECT STORAGE
+  sessionStorage.removeItem("employeeToken");
   localStorage.removeItem("employeeName");
   localStorage.removeItem("employeeEmail");
-  window.location.href = "employee-login.html";
+
+  window.location.replace("employee-login.html");
 }
 </script>
 

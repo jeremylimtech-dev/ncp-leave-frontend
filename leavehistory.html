@@ -28,60 +28,61 @@ const SCRIPT_URL =
   "https://script.google.com/macros/s/AKfycbz4zMRShI6IwL7ehez3Q9VX_ysMQb3Otv__59tgoe5-91zfEN1THvLSJjty_TCN24Wp/exec";
 
 
-const token = sessionStorage.getItem("employeeToken");
+document.addEventListener("DOMContentLoaded", () => {
+  const token = sessionStorage.getItem("employeeToken");
 
-if (!token) {
-  alert("Session expired. Please log in again.");
-  window.location.href = "employee-login.html";
-}
+  if (!token) {
+    window.location.replace("employee-login.html");
+    return;
+  }
 
-// 🔐 SECURE FETCH (NO employeeId, NO URL params)
-fetch(SCRIPT_URL, {
-  method: "POST",
-  body: new URLSearchParams({
-    action: "getLeaveHistorySecure",
-    token
+  fetch(SCRIPT_URL, {
+    method: "POST",
+    body: new URLSearchParams({
+      action: "getLeaveHistorySecure",
+      token
+    })
   })
-})
-  .then(res => res.json())
-  .then(res => {
-    document.getElementById("historyLoading").classList.add("hidden");
+    .then(res => res.json())
+    .then(res => {
+      document.getElementById("historyLoading").classList.add("hidden");
 
-    if (!res.success || res.data.length === 0) {
-      document.getElementById("emptyState").classList.remove("hidden");
-      return;
-    }
+      if (!res.success || res.data.length === 0) {
+        document.getElementById("emptyState").classList.remove("hidden");
+        return;
+      }
 
-    const list = document.getElementById("leaveList");
-    list.innerHTML = "";
+      const list = document.getElementById("leaveList");
+      list.innerHTML = "";
 
-    res.data.forEach(l => {
-      const card = document.createElement("div");
-      card.className = "request-card";
+      res.data.forEach(l => {
+        const card = document.createElement("div");
+        card.className = "request-card";
 
-      card.innerHTML = `
-        <div class="request-top">
-          <div class="leave-type">${l.type}</div>
-          <span class="status-badge ${l.status.toLowerCase()}">
-            ${l.status}
-          </span>
-        </div>
+        card.innerHTML = `
+          <div class="request-top">
+            <div class="leave-type">${l.type}</div>
+            <span class="status-badge ${l.status.toLowerCase()}">
+              ${l.status}
+            </span>
+          </div>
 
-        <div class="dates">
-          ${l.start} → ${l.end}
-        </div>
+          <div class="dates">
+            ${l.start} → ${l.end}
+          </div>
 
-        <div class="reason">${l.reason}</div>
-      `;
+          <div class="reason">${l.reason}</div>
+        `;
 
-      list.appendChild(card);
+        list.appendChild(card);
+      });
+    })
+    .catch(() => {
+      document.getElementById("historyLoading").textContent =
+        "Failed to load leave history";
     });
-  })
-  .catch(err => {
-    console.error(err);
-    document.getElementById("historyLoading").textContent =
-      "Failed to load leave history";
-  });
+});
+
   
 </script>
 

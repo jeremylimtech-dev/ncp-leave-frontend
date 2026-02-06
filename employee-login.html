@@ -52,9 +52,11 @@
 const SCRIPT_URL =
   "https://script.google.com/macros/s/AKfycbz4zMRShI6IwL7ehez3Q9VX_ysMQb3Otv__59tgoe5-91zfEN1THvLSJjty_TCN24Wp/exec";
 
-if (sessionStorage.getItem("employeeToken")) {
-  window.location.replace("employee-dashboard.html");
-}
+document.addEventListener("DOMContentLoaded", () => {
+  if (sessionStorage.getItem("employeeToken")) {
+    window.location.replace("employee-dashboard.html");
+  }
+});
 
 /* =====================
    NAVIGATION
